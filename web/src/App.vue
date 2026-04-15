@@ -1,9 +1,46 @@
 <template>
   <div>
-      Hello World
+    <div>Bot昵称：{{ bot_name }}</div>
+    <div>Bot战力：{{ bot_rating }}</div>
   </div>
   <router-view/>
 </template>
 
+<script>
+import $ from 'jquery'
+import { ref } from 'vue';
+
+export default {
+  name: "App",
+  setup() {
+    const bot_name = ref("");
+    const bot_rating = ref("");
+
+    $.ajax({
+      url: "http://127.0.0.1:3000/pk/getbotinfo/",
+      type: "get",
+      success: resp => {
+        bot_name.value = resp.name;
+        bot_rating.value = resp.rating;
+      }
+    });
+
+    return {
+      bot_name,
+      bot_rating
+    }
+  }
+}
+</script>
+
 <style>
+body {
+  background-image: url("@/assets/background.jpg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-attachment: fixed;
+  min-height: 100vh;
+  margin: 0;
+}
 </style>
