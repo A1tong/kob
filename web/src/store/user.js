@@ -7,6 +7,7 @@ export default ({
         photo: "",
         token: "",
         is_login: false,
+        pulling_info: true, // 检测是否在获取信息，如果是的话，则不展示登录界面
     },
     getters: {
     },
@@ -26,6 +27,9 @@ export default ({
             state.photo = "";
             state.token = "";
             state.is_login = false;
+        },
+        updatePullingInfo(state, pulling_info) {
+            state.pulling_info = pulling_info;
         }
     },
     actions: {
@@ -39,7 +43,8 @@ export default ({
                 },
                 success(resp) {
                     if (resp.error_message === "success") {
-                        context.commit("updateToken", resp.token);
+                        localStorage.setItem("jwt_token", resp.token); // 把jwt令牌存入浏览器本地仓库中，实现持久化
+                        context.commit("updateToken", resp.token); // 把jwt令牌放入这里，实质是放入浏览器的内存中，一刷新就没了
                         data.success(resp);
                     } else {
                         data.error(resp);
@@ -74,6 +79,7 @@ export default ({
             });
         },
         logout(context) {
+            localStorage.removeItem("jwt_token");
             context.commit("logout");
         }
     },
