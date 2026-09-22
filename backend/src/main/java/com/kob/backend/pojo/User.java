@@ -15,4 +15,4 @@ public class User {
     private String username;
     private String password;
     private String photo;
-}
+} // 建立与数据库表一行信息对应的类

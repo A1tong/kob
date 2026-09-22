@@ -11,18 +11,20 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-@Service
+//实现注册板块接口对应的类
+@Service //和Component差不多
 public class RegisterServiceImpl implements RegisterService {
+    //final可以用于变量，继承，类，表示不可再次修改
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
+    //如果传参时，参数对应的类只有一个构造方法，Spring会自动接管把容器中该类的Bean对象注入
     public RegisterServiceImpl(UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Override
+    @Override // 重写接口方法
     public Map<String, String> register(String username, String password, String confirmedPassword) {
         Map<String, String> map = new HashMap<>();
         if (username == null) {
@@ -76,5 +78,4 @@ public class RegisterServiceImpl implements RegisterService {
         map.put("error_message", "success");
         return map;
     }
-
-}
+} // 注册板块的业务逻辑

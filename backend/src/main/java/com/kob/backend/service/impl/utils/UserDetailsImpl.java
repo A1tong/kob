@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 
-//实现UserDetails这个接口
+//实现UserDetails这个接口，因为spring security只认这个接口
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

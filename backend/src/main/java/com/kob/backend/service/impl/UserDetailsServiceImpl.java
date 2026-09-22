@@ -9,7 +9,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
+//这个类会被注册为Bean对象
+//并且这个类因为实现了接口UserDetailsServiec，Spring Security在启动时，会去找容器里有没有
+//UserDetailsService类型的Bean，找到后把它塞进DaoAuthenticationProvider里
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
