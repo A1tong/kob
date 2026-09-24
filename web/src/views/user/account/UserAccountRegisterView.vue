@@ -39,6 +39,10 @@ export default {
         let confirmedPassword = ref('');
         let error_message = ref('');
 
+        // 浏览器会把请求发给后端，而后端把响应发给浏览器，浏览器收到响应后要么把
+        // XMLHttpRequest.status = 0，要么把响应丢给XMLHttpRequest实例
+        // 后续执行success还是error，由jQuery这个全局实例对象决定
+        // (jQuery的JavaScript代码被浏览器加载后，就在浏览器内存里被创建了)
         const register = () => {
             $.ajax({
                 url: "http://127.0.0.1:3000/user/account/register/",

@@ -50,7 +50,6 @@ export default {
         } else {
             store.commit("updatePullingInfo", false);
         }
-
         const login = () => {
             error_message.value = "";
             store.dispatch("login", {
