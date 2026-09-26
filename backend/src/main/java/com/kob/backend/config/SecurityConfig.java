@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -51,5 +52,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // 项目中UsernamePasswordAuthenticationFilter没有被启用，只是被当作锚点，为什么选它作为锚点，因为它是官方的第一次登录验证
         // 插在它的前面，表示先验验用户是否有jwt令牌，有的话就不用第一次登录验证了
         http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
+    }
+
+    @Override // Spring Security默认会拦截所有WebSocket链接，这里的配置让其放行
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring().antMatchers("/websocket/**");
     }
 } // 这份配置文件会被Spring容器提前规划在蓝图中，防止创建的的Spring Security框架Bean实例与用户需要的不一致
