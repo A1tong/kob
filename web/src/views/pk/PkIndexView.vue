@@ -1,11 +1,13 @@
 <template>
     <PlayGround v-if="$store.state.pk.status === 'playing'" />
     <MatchGround v-if="$store.state.pk.status === 'matching'" />
+    <ResultBoard v-if="$store.state.pk.loser != 'none'" />
 </template>
 
 <script>
 import PlayGround from '../../components/PlayGround.vue'
 import MatchGround from '../../components/MatchGround.vue'
+import ResultBoard from '../../components/ResultBoard.vue'
 import { onMounted, onUnmounted } from 'vue' // 前者是组件被挂载后执行的函数，后者是组件被卸载时执行的函数
 import { useStore } from 'vuex'
 
@@ -13,6 +15,7 @@ export default {
     components: {
         PlayGround,
         MatchGround,
+        ResultBoard,
     },
     setup() {
         const store = useStore();
@@ -44,8 +47,32 @@ export default {
                     });
                     setTimeout(() => {
                         store.commit("updateStatus", "playing");
-                    }, 2000);
-                    store.commit("updateGamemap", data.gamemap);
+                    }, 200);
+                    store.commit("updateGame", data.game);
+                } else if (data.event === "move") {
+                    console.log(data);
+                    const game = store.state.pk.gameObject;
+                    if (!game) return; // 判空
+                    if (data.a_direction === undefined ||
+                        data.b_direction === undefined) return; // 方向缺失保护
+                    const [snake0, snake1] = game.snakes;
+                    snake0.set_direction(data.a_direction);
+                    snake1.set_direction(data.b_direction);
+                } else if (data.event === "result") {
+                    console.log(data);
+                    const game = store.state.pk.gameObject;
+                    if (!game) return; // 判空
+                    const [snake0, snake1] = game.snakes;
+
+                    if (data.loser === "all" || data.loser === "A") {
+                        snake0.status = "die";
+                        snake0.direction = -1;
+                    }
+                    if (data.loser === "all" || data.loser === "B") {
+                        snake1.status = "die";
+                        snake1.direction = -1;
+                    }
+                    store.commit("updateLoser", data.loser);
                 }
             }
 
