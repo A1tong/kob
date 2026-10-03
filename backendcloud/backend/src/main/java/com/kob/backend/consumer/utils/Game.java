@@ -2,7 +2,10 @@ package com.kob.backend.consumer.utils;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kob.backend.consumer.WebSocketServer;
+import com.kob.backend.pojo.Bot;
 import com.kob.backend.pojo.Record;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,14 +29,34 @@ public class Game extends Thread { // 继承Thread，使得该类可以创建线
     private String status = "playing"; // playing -> finished
     private String loser = ""; // all: 平局，A: A输，B：B输
     private Integer stepA, stepB; // 暂存锁中的移动方向
+    private final static String addBotUrl = "http://127.0.0.1:3002/bot/add/";
 
-    public Game(Integer rows, Integer cols, Integer inner_walls_count, Integer idA, Integer idB) {
+    public Game(Integer rows,
+                Integer cols,
+                Integer inner_walls_count,
+                Integer idA,
+                Bot botA,
+                Integer idB,
+                Bot botB
+    ) {
         this.rows = rows;
         this.cols = cols;
         this.inner_walls_count = inner_walls_count;
         this.g = new int[rows][cols];
-        playerA = new Player(idA, rows - 2, 1, new ArrayList<>());
-        playerB = new Player(idB, 1, cols - 2, new ArrayList<>());
+
+        Integer botIdA = -1, botIdB = -1;
+        String botCodeA = "", botCodeB = "";
+        if (botA != null) {
+            botIdA = botA.getId();
+            botCodeA = botA.getContent();
+        }
+        if (botB != null) {
+            botIdB = botB.getId();
+            botCodeB = botB.getContent();
+        }
+
+        playerA = new Player(idA, botIdA, botCodeA, rows - 2, 1, new ArrayList<>());
+        playerB = new Player(idB, botIdB, botCodeB, 1, cols - 2, new ArrayList<>());
     }
 
     public Player getPlayerA() {
@@ -45,7 +68,7 @@ public class Game extends Thread { // 继承Thread，使得该类可以创建线
     }
 
     // 在WebSocketServer中调用它，并给它传值，即tomcat线程会使用锁
-    public void setNextStepA(Integer nextStepA) {
+    public void setNextStepA(Integer nextStepA) { // 终点
         lock.lock();
         try {
             this.nextStepA = nextStepA;
@@ -118,6 +141,36 @@ public class Game extends Thread { // 继承Thread，使得该类可以创建线
         }
     }
 
+    private String getInput(Player player) { // 将当前的局面信息，编码成字符串
+        Player me, you; // 这里的处理保证了发给端口3002的信息中，前面蛇的信息是自己，后面蛇的信息是对手
+        if (playerA.getId().equals(player.getId())) {
+            me = playerA;
+            you = playerB;
+        } else {
+            me = playerB;
+            you = playerA;
+        }
+
+        return getMapString() + "#" +
+                me.getSx() + "#" +
+                me.getSy() + "#" +
+                me.getStepsString() + "#" +
+                you.getSx() + "#" +
+                you.getSy() + "#" +
+                you.getStepsString() + "#";
+    }
+
+    // 每走一步就把Bot的代码操作发给3002端口的后端服务，让其帮我们跑起来
+    public void sendBotCode(Player player) {
+        if (player.getBotId().equals(-1)) return ; // 真人操作就不用发了
+
+        MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
+        data.add("user_id", player.getId().toString());
+        data.add("bot_code", player.getBotCode());
+        data.add("input", getInput(player));
+        WebSocketServer.restTemplate.postForObject(addBotUrl, data, String.class);
+    }
+
     // 加锁实际上就是拿到了可以改的特权，别人只能读我最新写的
     private boolean nextStep() { // 等待两名玩家的下一步操作
         // 开头的sleep(200) → 开局缓冲，给前端渲染地图的时间，只执行一次
@@ -127,6 +180,9 @@ public class Game extends Thread { // 继承Thread，使得该类可以创建线
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+
+        sendBotCode(playerA); // 起点
+        sendBotCode(playerB); // 平替前端手动输入
 
         for (int i = 0; i < 50; i ++) {
             try { // 先尝试

@@ -21,6 +21,8 @@ export default {
         const store = useStore();
         const socketUrl = `ws://127.0.0.1:3000/websocket/${store.state.user.token}/`;
 
+        store.commit("updateLoser", "none");
+
         let socket = null;
         onMounted(() => { // 这里的挂载指的是界面被打开
             store.commit("updateOpponent", { // 因为用的是commit，所以会从仓库的mutations中找，没有找到，就递归的向下一层仓库的mutations中找

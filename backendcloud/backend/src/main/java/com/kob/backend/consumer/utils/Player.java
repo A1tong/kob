@@ -12,6 +12,8 @@ import java.util.List;
 @NoArgsConstructor
 public class Player {
     private Integer id;
+    private Integer botId; // -1表示真人，其余表示AI
+    private String botCode;
     private Integer sx; // 屁股横坐标
     private Integer sy; // 屁股纵坐标
     private List<Integer> steps; // 记录每个玩家蛇的每一步指令

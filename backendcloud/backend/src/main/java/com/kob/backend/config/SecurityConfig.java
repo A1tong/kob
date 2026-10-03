@@ -43,7 +43,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 配置请求授权规则，即哪些请求允许匿名访问本项目后端api，哪些必须登录访问本项目的后端api
                 .antMatchers("/user/account/token/", "/user/account/register/").permitAll()
                 // 配置请求授权规则，当前放行的url只允许本地服务器拿去访问本项目的后端api
-                .antMatchers("/pk/start/game/").hasIpAddress("127.0.0.1")
+                .antMatchers("/pk/start/game/", "/pk/receive/bot/move/").hasIpAddress("127.0.0.1")
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
                 .anyRequest().authenticated();
                 // 匹配所有OPTIONS请求，放行
